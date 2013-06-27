@@ -65,8 +65,11 @@ public class SimulatorEngine {
 						int slotNumber = ran.nextInt(MAX_TIME_SLOT);// pick random ts and ch.offset
 						int channelOffset = ran.nextInt(MAX_CH_OFFSET);
 						//TODO, check result of the operation and if false then do not reschedule or reset schedule
-						nodes[i].scheduleLink(slotNumber, channelOffset,Cell.SlotType.TX, j);
-						nodes[j].scheduleLink(slotNumber, channelOffset,Cell.SlotType.RX, i);
+						if (nodes[i].isLinkAvailable(slotNumber,channelOffset,Cell.SlotType.TX, j) &&
+								nodes[j].isLinkAvailable(slotNumber,channelOffset,Cell.SlotType.TX, j)){
+							nodes[i].scheduleLink(slotNumber, channelOffset,Cell.SlotType.TX, j);
+							nodes[j].scheduleLink(slotNumber, channelOffset,Cell.SlotType.RX, i);
+						}
 					}
 				}
 			}

@@ -56,19 +56,31 @@ public class Node {
  		if (ce.getType()==Cell.SlotType.OFF && ce.getTarget()==-1){
  	    	slotframe[slotNumber][channelOffset]=candidate;
  			this.numAllocated++;
+ 		}		
+	}
+
+	public boolean isLinkAvailable(int slotNumber, int channelOffset,SlotType type, int node) {
+		Cell candidate= new Cell(slotNumber, channelOffset, node, type);
+ 		//check for collisions
+ 		Cell ce=slotframe[slotNumber][channelOffset];
+ 		if (ce.getType()==Cell.SlotType.OFF && ce.getTarget()==-1){
+ 	    	 return true;
  		}else{
  			if (ce.compareTo(candidate)==0){
  				//rescheduling the same cell
  				this.numIdenticallyAllocated++;
+ 				
  				//System.out.println("Collision occurred by allocating the same cell at slotNumber " + slotNumber + " ch.Offset "+ channelOffset + " at Node " + this.id + " with neighbour " + node + " " +ce);
+ 				return true;
  			}else{
  				this.numCollisions++;
  			    //System.out.println("Collision occurred at slotNumber " + slotNumber + " ch.Offset "+ channelOffset + " at Node " + this.id + " with neighbour " + node + " " +ce);
- 			}
+ 				return false;
+ 			} 
  		}
-		
+ 	
 	}
-
+	
 	public int getNumIdenticallyAllocated() {
 		return numIdenticallyAllocated;
 	}
@@ -84,5 +96,7 @@ public class Node {
 	public void setNumNeighbors(int numNeighbors) {
 		this.numNeighbors = numNeighbors;
 	}
+
+	
 	
 }

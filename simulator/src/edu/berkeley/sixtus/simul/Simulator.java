@@ -11,7 +11,7 @@ public class Simulator {
 	 */
 	public static void main(String[] args) {
 		SimulatorEngine simul= new SimulatorEngine();
-		simul.simulate(1000);
+		simul.simulate(10);
 	}
 
 }
