@@ -19,14 +19,13 @@ public class SimulatorEngine {
 	public static final int MAX_TIME_SLOT = 101;
 	public static final int MAX_CH_OFFSET = 16;
 
-	public boolean[][] network = new boolean[MAX_NET_SIZE][MAX_NET_SIZE];// matrix
-																			// matching
-																			// neighbours
-	public Node[] nodes = new Node[MAX_NET_SIZE];
+	public boolean[][] network = new boolean[MAX_NET_SIZE][MAX_NET_SIZE];// matrix matching neighbours
+	public Node[] nodes = new Node[MAX_NET_SIZE]; //the nodes
+	
 	private int num_links_requested;
 
 	public SimulatorEngine() {
-
+      super();
 	}
 
 	/**
@@ -38,18 +37,43 @@ public class SimulatorEngine {
 		Random ran = new Random();
 		this.num_links_requested = links;
 
-		for (int i = 0; i < MAX_NET_SIZE; i++) {
-			for (int j = 0; j < MAX_NET_SIZE; j++) {
-				network[i][j] = false; // initialize network
-			}
-		}
-
-		// create the nodes:
-		for (int i = 0; i < MAX_NET_SIZE; i++) {
-			nodes[i] = new Node(i);
-		}
+		initializeNetwork();
 
 		// create the network randomly.
+		createNetworkTopology(ran);
+		// compute how many neighbors has each node and update each neighbor with that info
+		computeNumNeighbors();
+
+		// for each node in the network request several links to all neighbours
+		for (int numlink = 1; numlink < this.num_links_requested; numlink++) {
+			System.out.println("************************ requesting " + numlink + " links");
+			allocateLinks(ran, numlink);
+			printResult(numlink);
+			// reset the nodes: for the next iteration
+			resetNodes();
+			// compute how many neighbors has each node and update each neighbor with that info
+			computeNumNeighbors();
+		}
+	}
+
+	private void allocateLinks(Random ran, int l) {
+		for (int k = 0; k < l; k++) {
+			for (int i = 0; i < MAX_NET_SIZE; i++) {
+				for (int j = 0; j < MAX_NET_SIZE; j++) {
+					if (network[i][j]) {
+						// these are neighbors
+						int slotNumber = ran.nextInt(MAX_TIME_SLOT);// pick random ts and ch.offset
+						int channelOffset = ran.nextInt(MAX_CH_OFFSET);
+						//TODO, check result of the operation and if false then do not reschedule or reset schedule
+						nodes[i].scheduleLink(slotNumber, channelOffset,Cell.SlotType.TX, j);
+						nodes[j].scheduleLink(slotNumber, channelOffset,Cell.SlotType.RX, i);
+					}
+				}
+			}
+		}
+	}
+
+	private void createNetworkTopology(Random ran) {
 		for (int i = 0; i < MAX_NET_SIZE; i++) {
 			// select number of neighbors for that node
 			int num_nei = ran.nextInt(MAX_NUM_NEIGHBORS);
@@ -68,43 +92,20 @@ public class SimulatorEngine {
 				network[h][i] = true;// set it as the neighbour
 			}
 		}
-		// compute how many neighbors has each node and update each neighbor
-		// with that info
-		this.computeNumNeighbors();
+	}
 
-		// for each node in the network request several links to all neighbours
-		for (int l = 1; l < this.num_links_requested; l++) {
-			System.out.println("************************ requesting " + l
-					+ " links");
-			for (int k = 0; k < l; k++) {
-				for (int i = 0; i < MAX_NET_SIZE; i++) {
-					for (int j = 0; j < MAX_NET_SIZE; j++) {
-						if (network[i][j]) {
-							// these are neighbors
-
-							int slotNumber = ran.nextInt(MAX_TIME_SLOT);// pick
-																		// random
-																		// ts
-																		// and
-																		// ch.offset
-							int channelOffset = ran.nextInt(MAX_CH_OFFSET);
-							nodes[i].scheduleLink(slotNumber, channelOffset,
-									Cell.SlotType.TX, j);
-							nodes[j].scheduleLink(slotNumber, channelOffset,
-									Cell.SlotType.RX, i);
-						}
-					}
-				}
+	private void initializeNetwork() {
+		for (int i = 0; i < MAX_NET_SIZE; i++) {
+			for (int j = 0; j < MAX_NET_SIZE; j++) {
+				network[i][j] = false; // initialize network
 			}
+		}
+		resetNodes();
+	}
 
-			printResult(l);
-			// reset the nodes:
-			for (int i = 0; i < MAX_NET_SIZE; i++) {
-				nodes[i] = new Node(i);
-			}
-			// compute how many neighbors has each node and update each neighbor
-			// with that info
-			this.computeNumNeighbors();
+	private void resetNodes() {
+		for (int i = 0; i < MAX_NET_SIZE; i++) {
+			nodes[i] = new Node(i);
 		}
 	}
 
