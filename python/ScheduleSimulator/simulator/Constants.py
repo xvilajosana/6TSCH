@@ -1,0 +1,14 @@
+'''
+Created on 27/06/2013
+
+@author: xvilajosana
+'''
+MAX_TIME_SLOT = 101
+MAX_CH_OFFSET = 16
+MAX_NET_SIZE  = 50 
+MAX_NUM_NEIGHBORS  = 10
+MIN_NUM_NEIGHBORS  = 2
+
+CELL_TYPE_TX  = 0
+CELL_TYPE_RX  = 1
+CELL_TYPE_OFF = 2
